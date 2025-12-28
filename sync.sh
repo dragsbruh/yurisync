@@ -4,8 +4,9 @@ set -eou pipefail
 
 ATPROTO_DID=${ATPROTO_DID:-"did:plc:t3oqokywdpvn3kygygayxchk"}
 DOWNLOAD_CONCURRENCY=${DOWNLOAD_CONCURRENCY:-5}
+IMAGES_DIR=${IMAGES_DIR:-""}
 
-mkdir -p "$JSON_DIR" "$IMAGES_DIR" "$TMP_DIR"
+mkdir -p "$JSON_DIR" "$TMP_DIR"
 
 cursor_id=
 while true; do
@@ -54,25 +55,28 @@ done
 
 mv "$TMP_DIR"/*.json "$JSON_DIR/" 2>/dev/null || true
 
-echo "checking posts..."
+if [ -n "$IMAGES_DIR" ]; then
+  mkdir -p "$IMAGES_DIR"
 
-for json_path in "$JSON_DIR"/*.json; do
-  img_src=$(jq -r '.src' "$json_path")
+  echo "checking posts..."
 
-  name="$(basename "${json_path%.json}.jpeg")"
-  tmp_path="$TMP_DIR/$name"
-  final_path="$IMAGES_DIR/$name"
+  for json_path in "$JSON_DIR"/*.json; do
+    img_src=$(jq -r '.src' "$json_path")
+    name="$(basename "${json_path%.json}.jpeg")"
+    tmp_path="$TMP_DIR/$name"
+    final_path="$IMAGES_DIR/$name"
 
-  if [ ! -f "$final_path" ]; then
-    while [ "$(jobs -rp | wc -l)" -ge "$DOWNLOAD_CONCURRENCY" ]; do
-        sleep 0.1
-    done
+    if [ ! -f "$final_path" ]; then
+      while [ "$(jobs -rp | wc -l)" -ge "$DOWNLOAD_CONCURRENCY" ]; do
+          sleep 0.1
+      done
 
-    {
-      echo "downloading $img_src"
-      curl -fsSL "$img_src" -o "$tmp_path" && mv "$tmp_path" "$final_path"
-    } &
-  fi
-done
+      {
+        echo "downloading $img_src"
+        curl -fsSL "$img_src" -o "$tmp_path" && mv "$tmp_path" "$final_path"
+      } &
+    fi
+  done
 
-wait
+  wait
+fi
