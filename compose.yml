@@ -4,8 +4,8 @@ services:
     restart: unless-stopped
 
     volumes:
-      - /data:./yuri
-      # - /tmp/yuri:/yuri/.tmp
+      - ./yuri:/data
+      # - ./yuri/.tmp:/tmp/yuri
 
     environment:
       - JSON_DIR=/data/metadata
