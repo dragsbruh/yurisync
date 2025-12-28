@@ -1,0 +1,14 @@
+services:
+  yuriapi:
+    image: ghcr.io/dragsbruh/yuriapi:latest
+    restart: unless-stopped
+
+    volumes:
+      - /data:./yuri
+      # - /tmp/yuri:/yuri/.tmp
+
+    environment:
+      - JSON_DIR=/data/metadata
+      - IMAGES_DIR=/data/images
+      - TMP_DIR=/tmp/yuri
+      # - DOWNLOAD_CONCURRENCY=5

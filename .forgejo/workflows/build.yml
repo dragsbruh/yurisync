@@ -1,0 +1,31 @@
+name: build docker image
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  build:
+    runs-on: docker
+
+    env:
+      IMAGE: git.hearth.land/${{ forgejo.repository }}
+      TAG: ${{ forgejo.ref_name }}
+
+    steps:
+      - name: login to registry
+        run: echo "${{ secrets.CI_TOKEN }}" | docker login git.hearth.land -u dragsbruh --password-stdin
+
+      - uses: actions/checkout@v4
+
+      - name: build image
+        run: docker build -t $IMAGE:latest .
+
+      - name: tag
+        run: docker tag $IMAGE:latest $IMAGE:$TAG
+
+      - name: push image
+        run: |
+          docker push $IMAGE:latest
+          docker push $IMAGE:$TAG
