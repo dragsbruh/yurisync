@@ -1,0 +1,18 @@
+services:
+  yuriapi:
+    build: .
+    restart: no
+
+    volumes:
+      - ./yuri:/data
+      - ./yuri/.tmp:/tmp/yuri
+
+    ports:
+      - 8008:80
+
+    environment:
+      - JSON_DIR=/data/metadata
+      - IMAGES_DIR=/data/images
+      - TMP_DIR=/tmp/yuri
+      - ADDR=:80
+      # - DOWNLOAD_CONCURRENCY=5

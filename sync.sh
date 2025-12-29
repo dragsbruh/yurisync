@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eou pipefail
+set -euo pipefail
 
 ATPROTO_DID=${ATPROTO_DID:-"did:plc:t3oqokywdpvn3kygygayxchk"}
 DOWNLOAD_CONCURRENCY=${DOWNLOAD_CONCURRENCY:-5}
@@ -29,7 +29,7 @@ while true; do
         src: .fullsize,
         size: .aspectRatio,
         thumb: .thumb,
-        source: $post.record.text | match("yuri.4k.pics/([a-z|A-Z|0-9]{5}|[a-zA-Z0-9]{4})") | .string | trim | "https://\(.)",
+        source: $post.record.text | match("yuri.4k.pics/([a-zA-Z0-9]{5}|[a-zA-Z0-9]{4})") | .string | trim | "https://\(.)",
       }' <<< "$body")
 
   for item in "${items[@]}"; do
@@ -48,7 +48,7 @@ while true; do
   if [ "$cursor_id" = null ]; then
     break
   fi
-  echo "at cursor $cursor_id"
+  echo "sync: at cursor $cursor_id"
 
   sleep 0.5
 done
@@ -58,7 +58,7 @@ mv "$TMP_DIR"/*.json "$JSON_DIR/" 2>/dev/null || true
 if [ -n "$IMAGES_DIR" ]; then
   mkdir -p "$IMAGES_DIR"
 
-  echo "checking posts..."
+  echo "sync: checking posts..."
 
   for json_path in "$JSON_DIR"/*.json; do
     img_src=$(jq -r '.src' "$json_path")
@@ -72,7 +72,7 @@ if [ -n "$IMAGES_DIR" ]; then
       done
 
       {
-        echo "downloading $img_src"
+        echo "download: downloading $img_src"
         curl -fsSL "$img_src" -o "$tmp_path" && mv "$tmp_path" "$final_path"
       } &
     fi
@@ -80,3 +80,5 @@ if [ -n "$IMAGES_DIR" ]; then
 
   wait
 fi
+
+echo "sync: complete"
