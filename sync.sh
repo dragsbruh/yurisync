@@ -2,12 +2,6 @@
 
 set -euo pipefail
 
-ATPROTO_DID=${ATPROTO_DID:-"did:plc:t3oqokywdpvn3kygygayxchk"}
-DOWNLOAD_CONCURRENCY=${DOWNLOAD_CONCURRENCY:-5}
-IMAGES_DIR=${IMAGES_DIR:-""}
-
-mkdir -p "$JSON_DIR" "$TMP_DIR"
-
 cursor_id=
 while true; do
   body=$(curl -fsSL "https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?actor=$ATPROTO_DID&cursor=$cursor_id")
@@ -49,8 +43,6 @@ done
 mv "$TMP_DIR"/*.json "$JSON_DIR/" 2>/dev/null || true
 
 if [ -n "$IMAGES_DIR" ]; then
-  mkdir -p "$IMAGES_DIR"
-
   echo "sync: checking posts..."
 
   for json_path in "$JSON_DIR"/*.json; do

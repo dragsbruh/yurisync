@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-: "${IMAGES_DIR:?IMAGES_DIR not set}"
 : "${JSON_DIR:?JSON_DIR not set}"
 : "${ADDR:?ADDR not set}"
 
@@ -26,7 +25,13 @@ if [ ! -x "$SERVER_BIN" ]; then
   exit 1
 fi
 
-mkdir -p "$IMAGES_DIR" "$TMP_DIR" "$JSON_DIR"
+mkdir -p "$TMP_DIR" "$JSON_DIR"
+
+if [ -n "$IMAGES_DIR" ]; then
+  mkdir -p "$IMAGES_DIR"
+else
+  echo "warning: images will not be downloaded"
+fi
 
 echo "info: triggering initial sync"
 "$SYNC_SCRIPT"
