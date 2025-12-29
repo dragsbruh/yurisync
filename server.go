@@ -182,15 +182,13 @@ func (yc *YuCache) Update() error {
 
 		f, err := yc.JsonFS.Open(fname)
 		if err != nil {
-			log.Printf("error opening file: %v", err)
-			continue
+			return fmt.Errorf("open file: %w", err)
 		}
 
 		var yuri Yuri
 		if err := json.NewDecoder(f).Decode(&yuri); err != nil {
-			log.Printf("json decode error in yuri: %v", err)
 			f.Close()
-			continue
+			return fmt.Errorf("json decode: %w", err)
 		}
 		f.Close()
 
