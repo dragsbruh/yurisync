@@ -273,6 +273,11 @@ func (c *Routes) Yuri(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *Routes) YuriImage(w http.ResponseWriter, cid string, index int64) {
+	if c.ImageFS == nil {
+		writeErr(w, http.StatusForbidden, "image serving is disabled")
+		return
+	}
+
 	f, err := c.ImageFS.Open(filepath.Join(cid, fmt.Sprintf("%d.jpeg", index)))
 	if err != nil {
 		if os.IsNotExist(err) {
