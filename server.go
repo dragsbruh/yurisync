@@ -103,20 +103,18 @@ func main() {
 }
 
 type Yuri struct {
-	Sky struct {
-		Index     int       `json:"index"`
-		CID       string    `json:"cid"`
-		URI       string    `json:"uri"`
-		CreatedAt time.Time `json:"createdAt"`
-		Alt       string    `json:"alt"`
-	} `json:"sky"`
-	Size struct {
-		Width  int `json:"width"`
-		Height int `json:"height"`
-	} `json:"size"`
-	Src    string `json:"src"`
-	Thumb  string `json:"thumb"`
+	CID    string `json:"cid"`
+	URL    string `json:"url"`
 	Source string `json:"source"`
+
+	Images []struct {
+		Source string `json:"src"`
+		Thumb  string `json:"thumb"`
+		Size   struct {
+			Width  int `json:"width"`
+			Height int `json:"height"`
+		} `json:"size"`
+	} `json:"images"`
 }
 
 type YuCache struct {
