@@ -115,14 +115,14 @@ func main() {
 }
 
 type Yuri struct {
-	CID    string `json:"cid"`
-	URL    string `json:"url"`
-	Source string `json:"source"`
+	ID     string  `json:"id"`
+	URL    string  `json:"url"`
+	Author *string `json:"author"`
+	Source *string `json:"source"`
 
 	Images []struct {
-		Source string `json:"src"`
-		Thumb  string `json:"thumb"`
-		Size   struct {
+		Src  string `json:"src"`
+		Size struct {
 			Width  int `json:"width"`
 			Height int `json:"height"`
 		} `json:"size"`

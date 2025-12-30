@@ -11,21 +11,33 @@ while true; do
     | {
           images: [ .embed.images[] | {
             src: .fullsize,
-            thumb: .thumb,
             size: .aspectRatio,
           } ],
-          cid: .cid,
+          id: .cid,
+          author: null,
           url: .uri,
           source: .record.text | match("yuri.4k.pics/([a-zA-Z0-9]{5}|[a-zA-Z0-9]{4})") | .string | trim | "https://\(.)",
       }' <<< "$body")
 
   for item in "${items[@]}"; do
-    name=$(jq -r '"\(.cid).json"' <<< "$item")
+    name="$(jq -r '.id' <<< "$item").json"
+
     tmp_path="$TMP_DIR/$name"
     final_path="$JSON_DIR/$name"
 
     if [ -f "$final_path" ]; then
       break 2
+    fi
+
+    sourceUrl=$(jq -r '.source' <<< "$item")
+    finalUrl=$(curl -s -I "$sourceUrl" | grep -i '^location:' | awk '{print $2}' | tr -d '\r' || true)
+
+    if [[ "$finalUrl" == *"x.com"* ]]; then
+        authorName=$(echo "$finalUrl" | awk -F/ '{print $4}')
+        item=$(jq --arg a "$authorName" --arg source "$finalUrl" '.author = $a | .source = $source' <<< "$item")
+    elif [[ "$finalUrl" == *"bsky.app"* ]]; then
+        authorName=$(echo "$finalUrl" | awk -F/ '{print $5}')
+        item=$(jq --arg a "$authorName" --arg source "$finalUrl" '.author = $a | .source = $source' <<< "$item")
     fi
 
     echo "$item" > "$tmp_path"
@@ -46,8 +58,8 @@ if [ -n "$IMAGES_DIR" ]; then
   echo "sync: checking posts..."
 
   for json_path in "$JSON_DIR"/*.json; do
-    while IFS="=" read -r cid index src; do
-      name="$cid/$index.jpeg"
+    while IFS="=" read -r id index src; do
+      name="$id/$index.jpeg"
       tmp_path="$TMP_DIR/$name"
       final_path="$IMAGES_DIR/$name"
 
@@ -60,11 +72,11 @@ if [ -n "$IMAGES_DIR" ]; then
 
         {
           echo "download: downloading $src"
-          curl -fsSL "$src" -o "$tmp_path" && mv "$tmp_path" "$final_path"
+          curl -fsSL "$src" -o "$tmp_path" && mv "$tmp_path" "$final_path" && rmdir "$(dirname "$tmp_path")"
         } &
       fi
 
-    done < <(jq -c -r '. as $post | .images | to_entries[] | "\($post.cid)=\(.key)=\(.value.src)"' "$json_path")
+    done < <(jq -c -r '. as $post | .images | to_entries[] | "\($post.id)=\(.key)=\(.value.src)"' "$json_path")
   done
 
   wait
