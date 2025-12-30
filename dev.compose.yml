@@ -1,0 +1,12 @@
+services:
+  yurisync:
+    build: .
+    restart: no
+
+    environment:
+      - JSON_DIR=/data/metadata
+      - IMAGES_DIR=/data/images
+      - TMP_DIR=/data/.tmp
+      - SYNC_INTERVAL=10s
+    volumes:
+      - ./yuri:/data

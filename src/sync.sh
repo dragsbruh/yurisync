@@ -53,9 +53,9 @@ iter_images() {
   jq -c -r '.id as $id | .images | to_entries[] | "\($id)=\(.key)=\(.value.src)"'
 }
 
+echo "sync: getting feed..."
 cursor_id=
 while true; do
-  echo "sync: getting feed..."
   body=$(get_feed "$cursor_id")
   mapfile -t items < <(parse_feed <<< "$body")
 
@@ -75,8 +75,10 @@ while true; do
     author=
     if [[ "$finalUrl" == *"x.com"* ]]; then
       author=$(echo "$finalUrl" | awk -F/ '{print $4}')
+      source="$finalUrl"
     elif [[ "$finalUrl" == *"bsky.app"* ]]; then
       author=$(echo "$finalUrl" | awk -F/ '{print $5}')
+      source="$finalUrl"
     fi
 
     item=$(field_set "$item" source "$source")
@@ -117,7 +119,7 @@ if [ -n "$IMAGES_DIR" ]; then
 
         {
           echo "download: downloading $src"
-          curl -fsSL "$src" -o "$tmp_path" && mv "$tmp_path" "$final_path"
+          curl -fsSL "$src" > "$tmp_path" && mv "$tmp_path" "$final_path"
         } &
       fi
     done < <(iter_images < "$json_path")
@@ -125,7 +127,6 @@ if [ -n "$IMAGES_DIR" ]; then
 
   rmdir "$TMP_DIR"/* 2> /dev/null || true
   wait
-
 
   echo "sync: updating sizes..."
   for json_path in "$JSON_DIR"/*.json; do
